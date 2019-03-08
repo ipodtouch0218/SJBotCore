@@ -30,11 +30,10 @@ public class CommandHandler {
 		if (!isCommand(msg)) { return; } //not a command, but somehow got passed as one? huh.
 		
 		//TODO:
-//		String prefix = SJBotCore.getBotSettings().getDefaultCommandPrefix();
+		String prefix = SJBotCore.getBotSettings().defaultCommandPrefix;
 //		if (msg.getChannelType() == ChannelType.TEXT) {
 //			prefix = SJBotCore.getGuildSettings(msg.getGuild()).getCommandPrefix();
 //		}
-		String prefix = ">";
 		MessageChannel channel = msg.getChannel();
 		
 		String prefixRegex = Matcher.quoteReplacement(prefix); //regex to remove the command prefix from start of message
@@ -107,10 +106,9 @@ public class CommandHandler {
 			//finally, execute the command.
 			command.execute(msg, cmdName, args, flags);
 			
-			//TODO:
-//			if (BotMain.getBotSettings().getDeleteIssuedCommand()) {
-//				msg.delete().queue();
-//			}
+			if (SJBotCore.getBotSettings().deleteIssuedCommand) {
+				msg.delete().queue();
+			}
 		} catch (Exception e) {
 			//some error occured? output error message to discord
 			StringWriter stacktrace = new StringWriter();
@@ -127,8 +125,9 @@ public class CommandHandler {
 	 * @return If the specified message is parseable as a command. 
 	 */
 	public static boolean isCommand(Message msg) {
-		String prefix = ">"; //TODO: default prefix
+		String prefix = SJBotCore.getBotSettings().defaultCommandPrefix; 
 		if (msg.getChannelType() == ChannelType.TEXT) {
+			//TODO: guild prefix
 //			prefix = BotMain.getGuildSettings(msg.getGuild()).getCommandPrefix();
 		}
 		return msg.getContentDisplay().startsWith(prefix);
