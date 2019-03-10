@@ -4,6 +4,7 @@ import java.io.File;
 
 import javax.security.auth.login.LoginException;
 
+import me.ipodtouch0218.sjbotcore.command.BotCommand;
 import me.ipodtouch0218.sjbotcore.files.BotSettings;
 import me.ipodtouch0218.sjbotcore.files.YamlConfig;
 import me.ipodtouch0218.sjbotcore.handler.MessageHandler;
@@ -60,6 +61,14 @@ public class SJBotCore {
 	public void saveConfigToFile(File file) {
 		if (settings == null) { return; }
 		settings.saveConfig(file);
+	}
+	
+	//--Misc--//
+	public void registerCommand(BotCommand cmd) {
+		messageHandler.registerCommand(cmd);
+	}
+	public void unregisterCommand(BotCommand cmd) {
+		messageHandler.unregisterCommand(cmd);
 	}
 	
 	//--Getters--//

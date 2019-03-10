@@ -3,7 +3,7 @@ package me.ipodtouch0218.sjbotcore.command;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import me.ipodtouch0218.sjbotcore.handler.MessageHandler;
+import me.ipodtouch0218.sjbotcore.SJBotCore;
 import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.Message;
 
@@ -49,15 +49,6 @@ public abstract class BotCommand {
 	 * @param flags - List of {@link CommandFlag} which were parsed out of the command.
 	 */
 	public abstract void execute(Message msg, String alias, ArrayList<String> args, FlagSet flags);
-	
-	/**
-	 * Registers this command's instance to a {@link CommandHandler}. Note that this
-	 * is identical to {@link CommandHandler#registerCommand(BotCommand)}
-	 * @param cmdHandler - CommandHandler instance to register to.
-	 */
-	public void register(MessageHandler cmdHandler) {
-		cmdHandler.registerCommand(this);
-	}
 	
 	//--Setters--//
 	/**
