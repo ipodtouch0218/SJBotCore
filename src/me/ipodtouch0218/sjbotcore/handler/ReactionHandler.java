@@ -1,6 +1,5 @@
 package me.ipodtouch0218.sjbotcore.handler;
 
-import me.ipodtouch0218.sjbotcore.SJBotCore;
 import net.dv8tion.jda.core.entities.*;
 import net.dv8tion.jda.core.events.message.react.GenericMessageReactionEvent;
 
@@ -17,11 +16,9 @@ public abstract class ReactionHandler {
 	
 	
 	//---//
-	public void clearOwnerReactions(Message m) {
-		if (ownerId <= -1) { return; }
-		User owner = SJBotCore.getShardManager().getUserById(ownerId);
+	public void clearUserReactions(User user, Message m) {
 		for (MessageReaction r : m.getReactions()) {
-			r.removeReaction(owner).queue();
+			r.removeReaction(user).queue();
 		}
 	}
 	//---//

@@ -2,58 +2,97 @@ package me.ipodtouch0218.sjbotcore.handler;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import me.ipodtouch0218.sjbotcore.SJBotCore;
 import me.ipodtouch0218.sjbotcore.command.BotCommand;
 import me.ipodtouch0218.sjbotcore.command.CommandFlag;
+import me.ipodtouch0218.sjbotcore.command.FlagSet;
+import me.ipodtouch0218.sjbotcore.files.BotSettings;
 import net.dv8tion.jda.core.entities.ChannelType;
 import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.MessageChannel;
 import net.dv8tion.jda.core.entities.User;
+import net.dv8tion.jda.core.events.message.MessageDeleteEvent;
+import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.core.events.message.react.GenericMessageReactionEvent;
+import net.dv8tion.jda.core.events.message.react.MessageReactionAddEvent;
+import net.dv8tion.jda.core.hooks.ListenerAdapter;
 
-public class CommandHandler {
+public class MessageHandler extends ListenerAdapter {
 
 	private static final Pattern ARGS_WITH_QUOTES = Pattern.compile("[^\\s\"']+|\"([^\"]*)\"|'([^']*)'");
 	
 	///INSTANCE STUFFS
 	//--Variables & Constructor--//
-	private HashSet<BotCommand> commands = new HashSet<>(); //list of all registered commands
+	public MessageHandler(BotSettings config) {
+		this.configuration = config;
+	}
+	protected BotSettings configuration;
+	protected HashSet<BotCommand> commands = new HashSet<>(); //list of all registered commands
+	protected HashMap<Long, ReactionHandler> reactionHandlers = new HashMap<>();
+	
+	//--EVENTS--//
+	@Override
+	public void onMessageReceived(MessageReceivedEvent e) {
+		Message msg = e.getMessage();
+		User author = e.getAuthor();
+		
+		if (e.getAuthor().getIdLong() == e.getJDA().getSelfUser().getIdLong()) { return; }
+		if (isCommand(msg)) {
+			executeCommand(msg, author);
+		}
+	}
+	
+	@Override
+	public void onGenericMessageReaction(GenericMessageReactionEvent e) {
+		if (e.getUser().getIdLong() == e.getJDA().getSelfUser().getIdLong()) { return; }
+		long messageId = e.getMessageIdLong();
+		
+		if (reactionHandlers.containsKey(messageId)) {
+			//this message has a reactionhandler for it. run it.
+			ReactionHandler handler = reactionHandlers.get(messageId);
+			handleReaction(handler, e);
+		}
+	}
+	
+	@Override
+	public void onMessageDelete(MessageDeleteEvent e) {
+		if (reactionHandlers.containsKey(e.getMessageIdLong())) {
+			reactionHandlers.remove(e.getMessageIdLong());
+		}
+	}
+	
+	//--Reaction Handling--//
+	protected void handleReaction(ReactionHandler handler, GenericMessageReactionEvent e) {
+		boolean isOwner = false;
+		boolean add = e instanceof MessageReactionAddEvent;
+		if (handler.getOwnerId() > -1) {
+			isOwner = (e.getUser().getIdLong() == handler.getOwnerId());
+		}
+		handler.handleReaction(e, add, isOwner);
+	}
 	
 	//--Command Execution--//
-	public void executeCommand(Message msg, User sender) {
+	protected void executeCommand(Message msg, User sender) {
 		if (!isCommand(msg)) { return; } //not a command, but somehow got passed as one? huh.
+		MessageChannel channel = msg.getChannel();
 		
 		//TODO:
-		String prefix = SJBotCore.getBotSettings().defaultCommandPrefix;
+		String prefix = configuration.defaultCommandPrefix;
 //		if (msg.getChannelType() == ChannelType.TEXT) {
 //			prefix = SJBotCore.getGuildSettings(msg.getGuild()).getCommandPrefix();
 //		}
-		MessageChannel channel = msg.getChannel();
 		
 		String prefixRegex = Matcher.quoteReplacement(prefix); //regex to remove the command prefix from start of message
 		String strippedMessage = msg.getContentRaw().replaceFirst(prefixRegex, "");	//removed the command prefix from the message
 		
-		ArrayList<String> args = new ArrayList<>();
-		
-		Matcher matcher = ARGS_WITH_QUOTES.matcher(strippedMessage);
-		while (matcher.find()) {
-			String match = matcher.group();
-			if (match.matches("\"([^\"]*)\"|'([^']*)'")) {
-				//remove the initial quotes.
-				match = match.substring(1, match.length()-1);
-			}
-			args.add(match);
-		}
-		
-		String cmdName = args.get(0);
-		BotCommand command = getCommandByName(cmdName);	//first argument is the command itself.
-		if (command == null) {	
+		ArrayList<String> arguments = parseArguments(strippedMessage);
+		String cmdName = arguments.get(0);
+		Optional<BotCommand> optCommand = getCommandByName(cmdName); //first argument is the command itself.
+		arguments.remove(0); //remove the command itself
+		if (!optCommand.isPresent()) {	
 			//invalid command, send error and return.
 			BotCommand closest = closestCommand(cmdName);
 			if (closest == null) { return; }
@@ -61,6 +100,8 @@ public class CommandHandler {
 			channel.sendMessage(":pancakes: **Unknown Command:** `" + cmdName + "`. Did you mean to type `" + closest.getName() + "`?").queue();
 			return;
 		}
+		
+		BotCommand command = optCommand.get();
 		if (!command.canExecute(msg)) {
 			//command cannot be ran through this channel type
 			channel.sendMessage(":pancakes: **Error:** You cannot run this command in a " + (msg.getChannelType() == ChannelType.TEXT ? "Guild" : "DM") + "!").queue();
@@ -75,38 +116,13 @@ public class CommandHandler {
 			}
 		}
 		
-		args.remove(0); //remove the command name from the arguments.
-		HashMap<String,CommandFlag> flags = new HashMap<>();
-		//populate flag list
-		Iterator<String> it = args.iterator();
-		while (it.hasNext()) {
-			String argument = it.next();
-			if (!argument.matches("-[^\\d].*")) { continue; }
-			String dashRemoved = argument.substring(1, argument.length());
-			if (!command.isFlagRegistered(dashRemoved)) { continue; }
-			//this argument is a flag, remove it from args and retrieve parameters
-			int parametercount = command.getFlags().get(dashRemoved);
-			it.remove();
-			
-			String[] parameters = new String[parametercount];
-			for (int i = 0; i < parametercount; i++) {
-				if (!it.hasNext()) {
-					//no parameters left for this flag? err....
-					channel.sendMessage(":pancakes: **Command Parse Error:** Ran out of parameters for the `" + argument + "` flag (" + parametercount + " required).").queue();
-					return;
-				}
-				String nextArg = it.next();
-				parameters[i] = nextArg;
-				it.remove();
-			}
-			flags.put(dashRemoved, new CommandFlag(dashRemoved, parameters));
-		}
-		
 		try {
+			//separate flags from arguments
+			FlagSet flags = parseFlagsFromArguments(command, arguments);
 			//finally, execute the command.
-			command.execute(msg, cmdName, args, flags);
+			command.execute(msg, cmdName, arguments, flags);
 			
-			if (SJBotCore.getBotSettings().deleteIssuedCommand) {
+			if (configuration.deleteIssuedCommand) {
 				msg.delete().queue();
 			}
 		} catch (Exception e) {
@@ -117,6 +133,60 @@ public class CommandHandler {
 		}
 	}
 	
+	protected ArrayList<String> parseArguments(String inputMessage) {
+		ArrayList<String> args = new ArrayList<>();
+		
+		Matcher matcher = ARGS_WITH_QUOTES.matcher(inputMessage);
+		while (matcher.find()) {
+			String match = matcher.group();
+			if (match.matches("\"([^\"]*)\"|'([^']*)'")) {
+				//remove the initial quotes.
+				match = match.substring(1, match.length()-1);
+			}
+			args.add(match);
+		}
+		return args;
+	}
+	protected FlagSet parseFlagsFromArguments(BotCommand command, ArrayList<String> arguments) {
+		HashSet<CommandFlag> flags = new HashSet<CommandFlag>() {
+			private static final long serialVersionUID = 1L;
+			@Override
+			public boolean contains(Object obj) {
+				if (obj == null) { return false; }
+				if (obj instanceof String) {
+					return stream().anyMatch(f -> f.getTag().equalsIgnoreCase(obj.toString()));
+				}
+				return super.contains(obj);
+			}
+		};
+		
+		//populate flag list
+		Iterator<String> it = arguments.iterator();
+		while (it.hasNext()) {
+			String argument = it.next();
+			if (!argument.matches("-[^\\d].*")) { continue; }
+			//not a flag, doesnt start with a dash -char
+			String dashRemoved = argument.substring(1, argument.length());
+			if (!command.isFlagRegistered(dashRemoved)) { continue; }
+			//this argument is a flag, remove it from args and retrieve parameters
+			int parametercount = command.getFlags().get(dashRemoved);
+			it.remove();
+			
+			String[] parameters = new String[parametercount];
+			for (int i = 0; i < parametercount; i++) {
+				if (!it.hasNext()) {
+					//no parameters left for this flag? err error?....
+					throw new IllegalArgumentException("Ran out of parameters for flag " + dashRemoved + ": Expected " + parametercount + ", got " + i);
+				}
+				String nextArg = it.next();
+				parameters[i] = nextArg;
+				it.remove();
+			}
+			flags.add(new CommandFlag(dashRemoved, parameters));
+		}
+		return new FlagSet(flags);
+	}
+	
 	//--Misc Functions--//
 	/**
 	 * Returns if a given message can be parsed into a {@link BotCommand}. Automatically
@@ -124,8 +194,8 @@ public class CommandHandler {
 	 * @param msg - Discord {@link Message} instance to check. 
 	 * @return If the specified message is parseable as a command. 
 	 */
-	public static boolean isCommand(Message msg) {
-		String prefix = SJBotCore.getBotSettings().defaultCommandPrefix; 
+	public boolean isCommand(Message msg) {
+		String prefix = configuration.defaultCommandPrefix; 
 		if (msg.getChannelType() == ChannelType.TEXT) {
 			//TODO: guild prefix
 //			prefix = BotMain.getGuildSettings(msg.getGuild()).getCommandPrefix();
@@ -140,7 +210,7 @@ public class CommandHandler {
 	 * @return A possibly-null {@link BotCommand} with a similar name to the input.
 	 * @see <a href="https://en.wikipedia.org/wiki/Levenshtein_distance">Levenshtein Distance</a>
 	 */
-	private BotCommand closestCommand(String input) {
+	protected BotCommand closestCommand(String input) {
 
 		BotCommand closest = null;
 		float closestDistance = 1;
@@ -162,7 +232,7 @@ public class CommandHandler {
 	}
 	
 	
-	//--Command Management--//
+	//--Register--//
 	/**
 	 * Registers a command to this CommandHandler. Commands must be registered before they will
 	 * be able to be exectued by users and detected by help commands.
@@ -175,10 +245,16 @@ public class CommandHandler {
 	public boolean unregisterCommand(BotCommand newCmd) {
 		return commands.remove(newCmd);
 	}
+	public void addReactionHandler(long messageid, ReactionHandler handler) {
+		reactionHandlers.put(messageid, handler);
+	}
+	public void removeReactionHandler(long messageId) {
+		reactionHandlers.remove(messageId);
+	}
 	
 	//--Getters--//
 	public HashSet<BotCommand> getAllCommands() { return commands; }
-	public BotCommand getCommandByName(String name) {
+	public Optional<BotCommand> getCommandByName(String name) {
 		BotCommand cmd = null;
 		for (BotCommand cmds : commands) {
 			if (name.equalsIgnoreCase(cmds.getName())) { 
@@ -196,7 +272,7 @@ public class CommandHandler {
 				}
 			}
 		}
-		return cmd;
+		return Optional.ofNullable(cmd);
 	}
 
 }

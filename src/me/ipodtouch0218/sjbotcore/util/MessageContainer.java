@@ -1,5 +1,7 @@
 package me.ipodtouch0218.sjbotcore.util;
 
+import java.util.Optional;
+
 import net.dv8tion.jda.bot.sharding.ShardManager;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.entities.Guild;
@@ -27,8 +29,8 @@ public class MessageContainer {
 	
 	////
 	public long getGuildId() { return guildId; }
-	public Guild getGuild(JDA jda) { return jda.getGuildById(guildId); }
-	public Guild getGuild(ShardManager sm) { return sm.getGuildById(guildId); }
+	public Optional<Guild> getGuild(JDA jda) { return Optional.ofNullable(jda.getGuildById(guildId)); }
+	public Optional<Guild> getGuild(ShardManager sm) { return Optional.ofNullable(sm.getGuildById(guildId)); }
 	
 	////
 	public long getChannelId() { return channelId; }

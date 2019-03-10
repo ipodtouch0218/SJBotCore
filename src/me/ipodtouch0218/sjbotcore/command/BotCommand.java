@@ -3,7 +3,7 @@ package me.ipodtouch0218.sjbotcore.command;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import me.ipodtouch0218.sjbotcore.handler.CommandHandler;
+import me.ipodtouch0218.sjbotcore.handler.MessageHandler;
 import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.Message;
 
@@ -12,6 +12,7 @@ public abstract class BotCommand {
 	//--Variables & Constructor--//
 	private String name; //Command name. Used to run the command itself, [prefix][name]
 	private String[] aliases; //The command can also be ran through these names. Command names take priority over aliases (if there's overlap)
+	@Deprecated
 	private Permission permission; //Permission the user needs to use this command.
 	
 	private String usage; //Command usage, <> = required parameters, [] = optional parameters 
@@ -25,6 +26,7 @@ public abstract class BotCommand {
 	public BotCommand(String name, boolean guilds, boolean dms) {
 		this(name, guilds, dms, null);
 	}
+	@Deprecated
 	public BotCommand(String name, boolean guilds, boolean dms, Permission perm) {
 		this.name = name;
 		this.useInGuilds = guilds;
@@ -44,24 +46,25 @@ public abstract class BotCommand {
 	 * @param msg - Discord message instance.
 	 * @param alias - Alias used to execute the command.
 	 * @param args - List of arguments separated by spaces (Excluding flags and their parameters).
-	 * @param flags - List of flags (including flag parameters) which were parsed out of the command.
+	 * @param flags - List of {@link CommandFlag} which were parsed out of the command.
 	 */
-	public abstract void execute(Message msg, String alias, ArrayList<String> args, HashMap<String,CommandFlag> flags);
+	public abstract void execute(Message msg, String alias, ArrayList<String> args, FlagSet flags);
 	
 	/**
 	 * Registers this command's instance to a {@link CommandHandler}. Note that this
 	 * is identical to {@link CommandHandler#registerCommand(BotCommand)}
 	 * @param cmdHandler - CommandHandler instance to register to.
 	 */
-	public void register(CommandHandler cmdHandler) {
+	public void register(MessageHandler cmdHandler) {
 		cmdHandler.registerCommand(this);
 	}
 	
 	//--Setters--//
 	/**
-	 * Sets the {@link Permission} a sender of a command must have to execute this command
+	 * Sets the Discord {@link Permission} a sender of a command must have to execute this command
 	 * @param permission - New {@link Permission} to require.
 	 */
+	@Deprecated
 	public void setPermission(Permission permission) {
 		this.permission = permission;
 	}
@@ -93,14 +96,13 @@ public abstract class BotCommand {
 		registeredFlags.put(tag,parameters);
 	}
 	
-	
-	
 	//--Getters--//
 	public String getName() { return name; }
 	public String[] getAliases() { return aliases; }
 	public String getUsage() { return usage; }
 	public String getDescription() { return description; }
 	public boolean isFlagRegistered(String tag) { return registeredFlags.containsKey(tag); }
+	@Deprecated
 	public Permission getPermission() { return permission; }
 	public HashMap<String,Integer> getFlags() { return registeredFlags; }
 	
