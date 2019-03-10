@@ -10,11 +10,11 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 public class YamlConfig {
 
 	@JsonIgnore
-	private static final ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
+	public static final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
 	
 	public void saveConfig(File file) {
 		try {
-			yamlMapper.writeValue(file, this);
+			mapper.writeValue(file, this);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -23,7 +23,7 @@ public class YamlConfig {
 	public static <T extends YamlConfig> T loadConfig(File file, Class<T> classType) {
 		try {
 			//Try to read the file
-			return yamlMapper.readValue(file, classType);
+			return mapper.readValue(file, classType);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
