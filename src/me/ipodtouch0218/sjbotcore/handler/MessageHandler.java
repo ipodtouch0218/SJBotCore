@@ -215,9 +215,7 @@ public class MessageHandler extends ListenerAdapter {
 		BotCommand closest = null;
 		float closestDistance = 1;
 		for (BotCommand other : commands) {
-			//TODO:
-			int distance = 10;
-//			int distance = MiscUtils.calcLevenshteinDistance(input, other.getName());
+			int distance = calcLevenshteinDistance(input, other.getName());
 			float smartDistance = (float) distance / (float) other.getName().length();
 			if (smartDistance < closestDistance) {
 				closestDistance = smartDistance;
@@ -229,6 +227,30 @@ public class MessageHandler extends ListenerAdapter {
 			return closest;
 		}
 		return null;
+	}
+	
+	private static int calcLevenshteinDistance(String x, String y) {
+		//don't ask i just-... um..
+	    int[][] dp = new int[x.length() + 1][y.length() + 1];
+	 
+	    for (int i = 0; i <= x.length(); i++) {
+	        for (int j = 0; j <= y.length(); j++) {
+	            if (i == 0) {
+	                dp[i][j] = j;
+	            }
+	            else if (j == 0) {
+	                dp[i][j] = i;
+	            }
+	            else {
+	                dp[i][j] = Math.min(dp[i - 1][j - 1] 
+	                + (x.charAt(i-1) == y.charAt(j-1) ? 0 : 1), 
+	                  Math.min(dp[i - 1][j] + 1, 
+	                  dp[i][j - 1] + 1));
+	            }
+	        }
+	    }
+	 
+	    return dp[x.length()][y.length()];
 	}
 	
 	
