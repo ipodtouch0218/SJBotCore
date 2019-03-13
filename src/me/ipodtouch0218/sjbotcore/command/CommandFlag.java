@@ -13,4 +13,20 @@ public class CommandFlag {
 	//--Getters--//
 	public String[] getParameters() { return parameters; }
 	public String getTag() { return flagTag; }
+	
+	//--Other--//
+	public static class FlagParameterException extends Exception {
+		private static final long serialVersionUID = 1L;
+		private String tag;
+		private int expectedParameters;
+		private int gottenParameters;
+		public FlagParameterException(String tag, int expected, int gotten) {
+			this.tag = tag;
+			this.expectedParameters = expected;
+			this.gottenParameters = gotten;
+		}
+		public String getFlagTag() { return tag; }
+		public int getExpectedParameterCount() { return expectedParameters; }
+		public int getGottenParameterCount() { return gottenParameters; }
+	}
 }

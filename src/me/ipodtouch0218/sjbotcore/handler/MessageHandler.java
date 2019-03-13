@@ -6,10 +6,11 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import me.ipodtouch0218.sjbotcore.SJBotCore;
 import me.ipodtouch0218.sjbotcore.command.BotCommand;
 import me.ipodtouch0218.sjbotcore.command.CommandFlag;
+import me.ipodtouch0218.sjbotcore.command.CommandFlag.FlagParameterException;
 import me.ipodtouch0218.sjbotcore.command.FlagSet;
-import me.ipodtouch0218.sjbotcore.files.BotSettings;
 import net.dv8tion.jda.core.entities.ChannelType;
 import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.MessageChannel;
@@ -26,10 +27,10 @@ public class MessageHandler extends ListenerAdapter {
 	
 	///INSTANCE STUFFS
 	//--Variables & Constructor--//
-	public MessageHandler(BotSettings config) {
-		this.configuration = config;
+	public MessageHandler(SJBotCore sjBotCore) {
+		this.core = sjBotCore;
 	}
-	protected BotSettings configuration;
+	protected SJBotCore core;
 	protected HashSet<BotCommand> commands = new HashSet<>(); //list of all registered commands
 	protected HashMap<Long, ReactionHandler> reactionHandlers = new HashMap<>();
 	
@@ -80,7 +81,7 @@ public class MessageHandler extends ListenerAdapter {
 		MessageChannel channel = msg.getChannel();
 		
 		//TODO:
-		String prefix = configuration.defaultCommandPrefix;
+		String prefix = core.getBotSettings().defaultCommandPrefix;
 //		if (msg.getChannelType() == ChannelType.TEXT) {
 //			prefix = SJBotCore.getGuildSettings(msg.getGuild()).getCommandPrefix();
 //		}
@@ -94,24 +95,39 @@ public class MessageHandler extends ListenerAdapter {
 		arguments.remove(0); //remove the command itself
 		if (!optCommand.isPresent()) {	
 			//invalid command, send error and return.
+			if (core.getBotSettings().sendUnknownCommandMessage && !core.getBotSettings().unknownCommandSuggestions) {
+				channel.sendMessage(String.format(core.getMessages().unknownCommand, cmdName)).queue();
+				return;
+			}
 			BotCommand closest = closestCommand(cmdName);
-			if (closest == null) { return; }
+			if (closest == null && core.getBotSettings().sendUnknownCommandMessage) {
+				channel.sendMessage(String.format(core.getMessages().unknownCommand, cmdName)).queue();
+			} else if (core.getBotSettings().unknownCommandSuggestions) {
+				channel.sendMessage(String.format(core.getMessages().unknownCommandSuggestion, cmdName, closest.getName())).queue();
+			}
 			
-			channel.sendMessage(":pancakes: **Unknown Command:** `" + cmdName + "`. Did you mean to type `" + closest.getName() + "`?").queue();
 			return;
 		}
 		
 		BotCommand command = optCommand.get();
 		if (!command.canExecute(msg)) {
 			//command cannot be ran through this channel type
-			channel.sendMessage(":pancakes: **Error:** You cannot run this command in a " + (msg.getChannelType() == ChannelType.TEXT ? "Guild" : "DM") + "!").queue();
+			String reply = "";
+			if (msg.getChannelType() == ChannelType.TEXT) {
+				reply = core.getMessages().invalidChannelGuild;
+			} else {
+				reply = core.getMessages().invalidChannelDM;
+			}
+			channel.sendMessage(reply).queue();
 			return;
 		}
 		if (msg.getChannelType() == ChannelType.TEXT) {	
 			//guild text channel, can check for permissions
 			//TODO:
 			if (command.getPermission() != null && !msg.getMember().hasPermission(command.getPermission()) /*&& !BotMain.getGuildSettings(msg.getGuild()).isBotAdmin(sender.getIdLong())*/) {
-				channel.sendMessage(":pancakes: **Error:** You must have the `" + command.getPermission().name() + "` permission to use this command!").queue();
+				
+				String reply = String.format(core.getMessages().noPermission, command.getPermission().name());
+				channel.sendMessage(reply).queue();
 				return;
 			}
 		}
@@ -122,14 +138,16 @@ public class MessageHandler extends ListenerAdapter {
 			//finally, execute the command.
 			command.execute(msg, cmdName, arguments, flags);
 			
-			if (configuration.deleteIssuedCommand) {
+			if (core.getBotSettings().deleteIssuedCommand) {
 				msg.delete().queue();
 			}
+		} catch (FlagParameterException e) {
+			channel.sendMessage(String.format(core.getMessages().flagError, e.getFlagTag(), e.getExpectedParameterCount(), e.getGottenParameterCount())).queue();
 		} catch (Exception e) {
 			//some error occured? output error message to discord
 			StringWriter stacktrace = new StringWriter();
 			e.printStackTrace(new PrintWriter(stacktrace));
-			channel.sendMessage(":pancakes: **Command Error Caught:** " + e.getMessage() + " ```" + stacktrace.toString() + "```").queue();
+			channel.sendMessage(String.format(core.getMessages().commandError, stacktrace.toString())).queue();
 		}
 	}
 	
@@ -147,7 +165,7 @@ public class MessageHandler extends ListenerAdapter {
 		}
 		return args;
 	}
-	protected FlagSet parseFlagsFromArguments(BotCommand command, ArrayList<String> arguments) {
+	protected FlagSet parseFlagsFromArguments(BotCommand command, ArrayList<String> arguments) throws FlagParameterException {
 		HashSet<CommandFlag> flags = new HashSet<CommandFlag>() {
 			private static final long serialVersionUID = 1L;
 			@Override
@@ -176,7 +194,7 @@ public class MessageHandler extends ListenerAdapter {
 			for (int i = 0; i < parametercount; i++) {
 				if (!it.hasNext()) {
 					//no parameters left for this flag? err error?....
-					throw new IllegalArgumentException("Ran out of parameters for flag " + dashRemoved + ": Expected " + parametercount + ", got " + i);
+					throw new FlagParameterException(dashRemoved, parametercount, i);
 				}
 				String nextArg = it.next();
 				parameters[i] = nextArg;
@@ -195,7 +213,7 @@ public class MessageHandler extends ListenerAdapter {
 	 * @return If the specified message is parseable as a command. 
 	 */
 	public boolean isCommand(Message msg) {
-		String prefix = configuration.defaultCommandPrefix; 
+		String prefix = core.getBotSettings().defaultCommandPrefix; 
 		if (msg.getChannelType() == ChannelType.TEXT) {
 			//TODO: guild prefix
 //			prefix = BotMain.getGuildSettings(msg.getGuild()).getCommandPrefix();

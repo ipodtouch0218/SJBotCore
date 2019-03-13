@@ -3,7 +3,6 @@ package me.ipodtouch0218.sjbotcore.command;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import me.ipodtouch0218.sjbotcore.SJBotCore;
 import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.Message;
 

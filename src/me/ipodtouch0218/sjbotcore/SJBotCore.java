@@ -6,6 +6,7 @@ import javax.security.auth.login.LoginException;
 
 import me.ipodtouch0218.sjbotcore.command.BotCommand;
 import me.ipodtouch0218.sjbotcore.files.BotSettings;
+import me.ipodtouch0218.sjbotcore.files.MessageSettings;
 import me.ipodtouch0218.sjbotcore.files.YamlConfig;
 import me.ipodtouch0218.sjbotcore.handler.MessageHandler;
 import net.dv8tion.jda.bot.sharding.DefaultShardManagerBuilder;
@@ -16,23 +17,26 @@ public class SJBotCore {
 	/*
 	 * FEATURES TODO:
 	 * 
-	 * Voice capibility from URL (streams?)
+	 * Voice capibility from URL (streams? lavaplayer... maybe)
 	 * Use the configuration file for more.
 	 * Some type of permission system (or use discord permissions? maybe.)
-	 * Custom message outputs from MessageHandler
-	 * - instead of just extending the class & replacing it completely... somehow...
-	 * Fix "closest command" function
 	 */
 	
 	private boolean running;
 	
 	private ShardManager shardManager;
 	private MessageHandler messageHandler;
-	private BotSettings settings;
 	
+	private BotSettings settings;
+	private MessageSettings messages;
+	
+	public SJBotCore(File settingsFile) {
+		this(YamlConfig.loadConfig(settingsFile, BotSettings.class));
+	}
 	public SJBotCore(BotSettings settings) {
 		this.settings = settings;
-		messageHandler = new MessageHandler(settings);
+		messageHandler = new MessageHandler(this);
+		messages = new MessageSettings();
 	}
 	
 	//--Startup and Shutdown--//
@@ -46,12 +50,15 @@ public class SJBotCore {
 		shardManager = new DefaultShardManagerBuilder()
 			.setToken(token)
 			.addEventListeners(messageHandler)
+			.setAudioEnabled(settings.enableAudio)
 			.build();
 	}
+	
 	public void stopBot() {
 		if (!running || shardManager == null) { return; }
 		shardManager.shutdown();
 		running = false;
+		shardManager = null;
 	}
 	
 	//--Configuration Saving & Loading--//
@@ -71,9 +78,15 @@ public class SJBotCore {
 		messageHandler.unregisterCommand(cmd);
 	}
 	
+	//--Setters--//
+	public void setMessages(MessageSettings newsettings) {
+		messages = newsettings;
+	}
+	
 	//--Getters--//
 	public ShardManager getShardManager() { return shardManager; }
 	public MessageHandler getCommandHandler() { return messageHandler; }
 	public BotSettings getBotSettings() { return settings; }
+	public MessageSettings getMessages() { return messages; }
 	public boolean isBotRunning() { return running; }
 }
