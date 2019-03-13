@@ -8,8 +8,8 @@ public class BotSettings extends YamlConfig {
 	public String defaultCommandPrefix = ";"; //Command prefix used in dm's or servers without a custom cmd prefix.
 	public boolean deleteIssuedCommand = false; //If a command issued by a user should be deleted automatically
 	
-	public boolean unknownCommandSuggestions = true;
-	public boolean sendUnknownCommandMessage = false; //If the bot should reply to messages which aren't close enough to another message.
+	public boolean unknownCommandSuggestions = true; //If the bot should check if an unknown command is close to another to suggest.
+	public boolean sendUnknownCommandMessage = false; //If the bot should reply to commands which aren't close enough to another command.
 	
 	public BotSettings() {}
 }

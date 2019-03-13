@@ -102,7 +102,7 @@ public class MessageHandler extends ListenerAdapter {
 			BotCommand closest = closestCommand(cmdName);
 			if (closest == null && core.getBotSettings().sendUnknownCommandMessage) {
 				channel.sendMessage(String.format(core.getMessages().unknownCommand, cmdName)).queue();
-			} else if (core.getBotSettings().unknownCommandSuggestions) {
+			} else if (closest != null && core.getBotSettings().unknownCommandSuggestions) {
 				channel.sendMessage(String.format(core.getMessages().unknownCommandSuggestion, cmdName, closest.getName())).queue();
 			}
 			
