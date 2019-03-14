@@ -97,6 +97,18 @@ public abstract class BotCommand {
 	public void registerFlag(String tag, int parameters, String description) {
 		registeredFlags.add(new FlagInfo(tag, parameters, description));
 	}
+	/**
+	 * Adds a {@link CommandFlag} to this command. A flag must be registered in order to be parsed
+	 * properly by the {@link CommandHandler}.
+	 * 
+	 * @param tag - Name of the flag to add.
+	 * @param parameters - Required number of parameters for this flag.
+	 * @param description - Description to be listed in a help command.
+	 * @param usage - Usage information to be listed in a help command.
+	 */
+	public void registerFlag(String tag, int parameters, String description, String usage) {
+		registeredFlags.add(new FlagInfo(tag, parameters, description, usage));
+	}
 	
 	//--Getters--//
 	public String getName() { return name; }
