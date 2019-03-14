@@ -1,7 +1,8 @@
 package me.ipodtouch0218.sjbotcore.command;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Optional;
 
 import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.Message;
@@ -17,7 +18,7 @@ public abstract class BotCommand {
 	private String usage; //Command usage, <> = required parameters, [] = optional parameters 
 	private String description; //Command description, used in outputting the help page.
 	
-	private HashMap<String,Integer> registeredFlags = new HashMap<>(); //List of all flags. Flags must be registered before they will be parsed as flags.
+	private HashSet<FlagInfo> registeredFlags = new HashSet<>(); //List of all flags. Flags must be registered before they will be parsed as flags.
 	
 	private boolean useInGuilds; //Command can be used within Guilds
 	private boolean useInDMs; //Command can be used within DMs
@@ -83,7 +84,18 @@ public abstract class BotCommand {
 	 * @param parameters - Required number of parameters for this flag.
 	 */
 	public void registerFlag(String tag, int parameters) {
-		registeredFlags.put(tag,parameters);
+		registeredFlags.add(new FlagInfo(tag, parameters));
+	}
+	/**
+	 * Adds a {@link CommandFlag} to this command. A flag must be registered in order to be parsed
+	 * properly by the {@link CommandHandler}.
+	 * 
+	 * @param tag - Name of the flag to add.
+	 * @param parameters - Required number of parameters for this flag.
+	 * @param description - Description to be listed in a help command.
+	 */
+	public void registerFlag(String tag, int parameters, String description) {
+		registeredFlags.add(new FlagInfo(tag, parameters, description));
 	}
 	
 	//--Getters--//
@@ -91,10 +103,11 @@ public abstract class BotCommand {
 	public String[] getAliases() { return aliases; }
 	public String getUsage() { return usage; }
 	public String getDescription() { return description; }
-	public boolean isFlagRegistered(String tag) { return registeredFlags.containsKey(tag); }
+	public boolean isFlagRegistered(String tag) { return registeredFlags.stream().anyMatch(f -> tag.equalsIgnoreCase(f.getTag())); }
+	public Optional<FlagInfo> getFlag(String tag) { return registeredFlags.stream().filter(f -> tag.equalsIgnoreCase(f.getTag())).findAny(); }
 	@Deprecated
 	public Permission getPermission() { return permission; }
-	public HashMap<String,Integer> getFlags() { return registeredFlags; }
+	public HashSet<FlagInfo> getFlags() { return registeredFlags; }
 	
 	public boolean canExecute(Message msg) {
 		switch (msg.getChannelType()) {

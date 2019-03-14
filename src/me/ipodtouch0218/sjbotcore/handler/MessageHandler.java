@@ -10,6 +10,7 @@ import me.ipodtouch0218.sjbotcore.SJBotCore;
 import me.ipodtouch0218.sjbotcore.command.BotCommand;
 import me.ipodtouch0218.sjbotcore.command.CommandFlag;
 import me.ipodtouch0218.sjbotcore.command.CommandFlag.FlagParameterException;
+import me.ipodtouch0218.sjbotcore.command.FlagInfo;
 import me.ipodtouch0218.sjbotcore.command.FlagSet;
 import net.dv8tion.jda.core.entities.ChannelType;
 import net.dv8tion.jda.core.entities.Message;
@@ -187,7 +188,8 @@ public class MessageHandler extends ListenerAdapter {
 			String dashRemoved = argument.substring(1, argument.length());
 			if (!command.isFlagRegistered(dashRemoved)) { continue; }
 			//this argument is a flag, remove it from args and retrieve parameters
-			int parametercount = command.getFlags().get(dashRemoved);
+			FlagInfo flagInfo = command.getFlag(dashRemoved).get();
+			int parametercount = flagInfo.getParameterCount();
 			it.remove();
 			
 			String[] parameters = new String[parametercount];
