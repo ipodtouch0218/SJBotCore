@@ -148,7 +148,10 @@ public class MessageHandler extends ListenerAdapter {
 			//some error occured? output error message to discord
 			StringWriter stacktrace = new StringWriter();
 			e.printStackTrace(new PrintWriter(stacktrace));
-			channel.sendMessage(String.format(core.getMessages().commandError, stacktrace.toString())).queue();
+			String stack = stacktrace.toString();
+			stack = stack.substring(0, Math.min(2000-core.getMessages().commandError.length(), stack.length()-1));
+			
+			channel.sendMessage(String.format(core.getMessages().commandError, stack)).queue();
 		}
 	}
 	
