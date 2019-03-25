@@ -52,9 +52,17 @@ public class MessageContainer {
 	////
 	public long getMessageId() { return messageId; }
 	public RestAction<Message> getMessage(JDA jda) {
+		MessageChannel ch = getChannel(jda);
+		if (ch == null) { 
+			throw new IllegalArgumentException("Unable to get message with id " + messageId + " - invalid channel.");
+		}
 		return getChannel(jda).getMessageById(messageId);
 	}
 	public RestAction<Message> getMessage(ShardManager sm) {
+		MessageChannel ch = getChannel(sm);
+		if (ch == null) { 
+			throw new IllegalArgumentException("Unable to get message with id " + messageId + " - invalid channel.");
+		}
 		return getChannel(sm).getMessageById(messageId);
 	}
 }
