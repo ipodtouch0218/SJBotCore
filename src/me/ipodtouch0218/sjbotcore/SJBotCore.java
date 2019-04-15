@@ -11,14 +11,14 @@ import me.ipodtouch0218.sjbotcore.files.YamlConfig;
 import me.ipodtouch0218.sjbotcore.handler.MessageHandler;
 import net.dv8tion.jda.bot.sharding.DefaultShardManagerBuilder;
 import net.dv8tion.jda.bot.sharding.ShardManager;
+import net.dv8tion.jda.core.hooks.ListenerAdapter;
 
-public class SJBotCore {
+public class SJBotCore extends ListenerAdapter {
 
 	/*
 	 * FEATURES TODO:
 	 * 
 	 * Voice capibility from URL (streams? lavaplayer... maybe)
-	 * Use the configuration file for more.
 	 * Some type of permission system (or use discord permissions? maybe.)
 	 */
 	
@@ -49,7 +49,7 @@ public class SJBotCore {
 		}
 		shardManager = new DefaultShardManagerBuilder()
 			.setToken(token)
-			.addEventListeners(messageHandler)
+			.addEventListeners(messageHandler, this)
 			.setAudioEnabled(settings.enableAudio)
 			.build();
 	}
@@ -60,6 +60,7 @@ public class SJBotCore {
 		running = false;
 		shardManager = null;
 	}
+	
 	
 	//--Configuration Saving & Loading--//
 	public void loadConfigFromFile(File file) {

@@ -4,7 +4,7 @@ public class FlagInfo {
 
 	private String flagTag;
 	private int parameterCount;
-	private String description;
+	private String description = "N/A";
 	private String usage;
 	
 	public FlagInfo(String tag, int parameters) {

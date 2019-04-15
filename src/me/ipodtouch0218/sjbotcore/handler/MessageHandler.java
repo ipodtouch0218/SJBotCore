@@ -91,9 +91,14 @@ public class MessageHandler extends ListenerAdapter {
 		String strippedMessage = msg.getContentRaw().replaceFirst(prefixRegex, "");	//removed the command prefix from the message
 		
 		ArrayList<String> arguments = parseArguments(strippedMessage);
+		if (arguments.size() <= 0) {
+			//message starts with prefix, but nothing else. ignore.
+			return;
+		}
 		String cmdName = arguments.get(0);
 		Optional<BotCommand> optCommand = getCommandByName(cmdName); //first argument is the command itself.
 		arguments.remove(0); //remove the command itself
+		
 		if (!optCommand.isPresent()) {	
 			//invalid command, send error and return.
 			if (core.getBotSettings().sendUnknownCommandMessage && !core.getBotSettings().unknownCommandSuggestions) {

@@ -15,8 +15,8 @@ public abstract class BotCommand {
 	@Deprecated
 	private Permission permission; //Permission the user needs to use this command.
 	
-	private String usage; //Command usage, <> = required parameters, [] = optional parameters 
-	private String description; //Command description, used in outputting the help page.
+	private String usage = ""; //Command usage, <> = required parameters, [] = optional parameters 
+	private String description = "No Info Provided."; //Command description, used in outputting the help page.
 	
 	private HashSet<FlagInfo> registeredFlags = new HashSet<>(); //List of all flags. Flags must be registered before they will be parsed as flags.
 	
@@ -34,7 +34,6 @@ public abstract class BotCommand {
 		this.permission = perm;
 		
 		this.usage = name;
-		this.description = "No Info Provided.";
 	}
 	
 	//--//

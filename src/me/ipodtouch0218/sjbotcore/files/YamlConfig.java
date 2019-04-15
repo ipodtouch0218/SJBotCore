@@ -12,6 +12,7 @@ public class YamlConfig {
 	@JsonIgnore
 	public static final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
 	
+	
 	public void saveConfig(File file) {
 		try {
 			mapper.writeValue(file, this);
@@ -25,7 +26,7 @@ public class YamlConfig {
 			//Try to read the file
 			return mapper.readValue(file, classType);
 		} catch (IOException e) {
-			e.printStackTrace();
+			//e.printStackTrace();
 		}
 		try {
 			//Try to return a default instance

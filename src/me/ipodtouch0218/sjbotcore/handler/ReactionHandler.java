@@ -14,7 +14,6 @@ public abstract class ReactionHandler {
 	public void setOwnerId(long value) { ownerId = value; }
 	public long getOwnerId() { return ownerId; }
 	
-	
 	//---//
 	public void clearUserReactions(User user, Message m) {
 		for (MessageReaction r : m.getReactions()) {
