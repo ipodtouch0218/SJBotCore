@@ -10,12 +10,10 @@ import me.ipodtouch0218.sjbotcore.SJBotCore;
 import me.ipodtouch0218.sjbotcore.command.BotCommand;
 import me.ipodtouch0218.sjbotcore.command.CommandFlag;
 import me.ipodtouch0218.sjbotcore.command.CommandFlag.FlagParameterException;
+import me.ipodtouch0218.sjbotcore.files.BotSettings;
 import me.ipodtouch0218.sjbotcore.command.FlagInfo;
 import me.ipodtouch0218.sjbotcore.command.FlagSet;
-import net.dv8tion.jda.core.entities.ChannelType;
-import net.dv8tion.jda.core.entities.Message;
-import net.dv8tion.jda.core.entities.MessageChannel;
-import net.dv8tion.jda.core.entities.User;
+import net.dv8tion.jda.core.entities.*;
 import net.dv8tion.jda.core.events.message.MessageDeleteEvent;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.core.events.message.react.GenericMessageReactionEvent;
@@ -221,7 +219,7 @@ public class MessageHandler extends ListenerAdapter {
 	//--Misc Functions--//
 	/**
 	 * Returns if a given message can be parsed into a {@link BotCommand}. Automatically
-	 * checks for {@link GuildSettings} and recognizes the proper Command Prefix. 
+	 * checks for the command prefix settings within {@link BotSettings}. 
 	 * @param msg - Discord {@link Message} instance to check. 
 	 * @return If the specified message is parseable as a command. 
 	 */
@@ -290,7 +288,7 @@ public class MessageHandler extends ListenerAdapter {
 	 * Registers a command to this MessageHandler. Commands must be registered before they will
 	 * be able to be exectued by users and detected by help commands.
 	 * @param newCmd - Command to be registered
-	 * @return If the command was successfully added, i.e. {@link ArrayList#add()}
+	 * @return If the command was successfully added, i.e. {@link ArrayList#add(Object)}
 	 */
 	public boolean registerCommand(BotCommand newCmd) {
 		return commands.add(newCmd);
@@ -323,7 +321,7 @@ public class MessageHandler extends ListenerAdapter {
 	
 	//--Getters--//
 	/**
-	 * Returns all registered {@link BotCommands}
+	 * Returns all registered {@link BotCommand}
 	 * @return All currently registered commands.
 	 */
 	public HashSet<BotCommand> getAllCommands() { return commands; }

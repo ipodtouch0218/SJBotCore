@@ -1,7 +1,7 @@
 package me.ipodtouch0218.sjbotcore.command;
 
 /**
- * An info class containing parameters for creating a {@link CommandTag}.
+ * An info class containing parameters for creating a {@link CommandFlag}.
  */
 public class FlagInfo {
 

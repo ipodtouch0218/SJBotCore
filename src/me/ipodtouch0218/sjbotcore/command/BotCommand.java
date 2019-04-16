@@ -7,6 +7,7 @@ import java.util.Optional;
 import me.ipodtouch0218.sjbotcore.handler.MessageHandler;
 import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.Message;
+import net.dv8tion.jda.core.entities.User;
 
 /**
  * A command that can be executed by the bot. It will automatically be parsed
@@ -47,7 +48,7 @@ public abstract class BotCommand {
 	/**
 	 * Method that gets called when a message comes from a user that both 
 	 * starts with the command prefix + {@link BotCommand#name} OR any {@link BotCommand#aliases}
-	 * & The sender has the correct {@link BotCommand#permission} to use this command.
+	 * and The sender has the correct {@link BotCommand#permission} to use this command.
 	 * 
 	 * @param msg - Discord message instance.
 	 * @param alias - Alias used to execute the command.
@@ -66,7 +67,7 @@ public abstract class BotCommand {
 		this.permission = permission;
 	}
 	/**
-	 * Populates the description and usage. Natively used by {@link CmdHelp}
+	 * Populates the description and usage. Can be used by help commands.
 	 * @param description - Description of the command.
 	 * @param usage - Usage of the command including possible arguments.
 	 */
@@ -84,7 +85,7 @@ public abstract class BotCommand {
 	}
 	/**
 	 * Adds a {@link CommandFlag} to this command. A flag must be registered in order to be parsed
-	 * properly by the {@link CommandHandler}.
+	 * properly by the {@link MessageHandler}.
 	 * 
 	 * @param tag - Name of the flag to add.
 	 * @param parameters - Required number of parameters for this flag.
@@ -94,7 +95,7 @@ public abstract class BotCommand {
 	}
 	/**
 	 * Adds a {@link CommandFlag} to this command. A flag must be registered in order to be parsed
-	 * properly by the {@link CommandHandler}.
+	 * properly by the {@link MessageHandler}.
 	 * 
 	 * @param tag - Name of the flag to add.
 	 * @param parameters - Required number of parameters for this flag.
@@ -105,7 +106,7 @@ public abstract class BotCommand {
 	}
 	/**
 	 * Adds a {@link CommandFlag} to this command. A flag must be registered in order to be parsed
-	 * properly by the {@link CommandHandler}.
+	 * properly by the {@link MessageHandler}.
 	 * 
 	 * @param tag - Name of the flag to add.
 	 * @param parameters - Required number of parameters for this flag.

@@ -48,9 +48,7 @@ public class SJBotCore extends ListenerAdapter {
 	
 	/**
 	 * Starts the bot with the token from the current {@link BotSettings} instance.
-	 * @throws IllegalArgumentException
-	 * @throws LoginException
-	 * @see {@link SJBotCore#startBot(String)}
+	 * @see SJBotCore#startBot(String)
 	 */
 	public void startBot() throws IllegalArgumentException, LoginException {
 		startBot(settings.token);
@@ -59,8 +57,6 @@ public class SJBotCore extends ListenerAdapter {
 	 * Starts the bot with the given token. Settings will be loaded from the currently
 	 * loaded {@link BotSettings} instance.
 	 * @param token - String token the bot will use to login to the account.
-	 * @throws IllegalArgumentException
-	 * @throws LoginException
 	 */
 	public void startBot(String token) throws IllegalArgumentException, LoginException {
 		if (running && shardManager != null) {
@@ -75,7 +71,7 @@ public class SJBotCore extends ListenerAdapter {
 	
 	/**
 	 * Shuts down the currently running shard manager.
-	 * @see {@link ShardManager#shutdown()}
+	 * @see ShardManager#shutdown()
 	 */
 	public void stopBot() {
 		if (!running || shardManager == null) { return; }
@@ -98,7 +94,7 @@ public class SJBotCore extends ListenerAdapter {
 	/**
 	 * Saves the current Botsettings to a file.
 	 * @param file - File to save the current {@link BotSettings} configuration to.
-	 * @see {@link BotSettings#saveConfig(File)}
+	 * @see BotSettings#saveConfig(File)
 	 */
 	public void saveConfigToFile(File file) {
 		if (settings == null) { return; }
@@ -110,8 +106,8 @@ public class SJBotCore extends ListenerAdapter {
 	 * Registers a command to the currently used CommandHandler. Shorthand for
 	 * the {@link MessageHandler} register method.
 	 * @param cmd - Command to be registered
-	 * @return If the command was successfully added, i.e. {@link ArrayList#add()}
-	 * @see {@link MessageHandler#registerCommand(BotCommand)}
+	 * @return If the command was successfully added, i.e. {@link ArrayList#add(Object)}
+	 * @see MessageHandler#registerCommand(BotCommand)
 	 */
 	public boolean registerCommand(BotCommand cmd) {
 		return messageHandler.registerCommand(cmd);
@@ -121,7 +117,7 @@ public class SJBotCore extends ListenerAdapter {
 	 * the {@link MessageHandler} unregister method.
 	 * @param cmd - The command to be unregistered
 	 * @return If the command was successfully removed, i.e. {@link ArrayList#remove(Object)}
-	 * @see {@link MessageHandler#unregisterCommand(BotCommand)}
+	 * @see MessageHandler#unregisterCommand(BotCommand)
 	 */
 	public boolean unregisterCommand(BotCommand cmd) {
 		return messageHandler.unregisterCommand(cmd);

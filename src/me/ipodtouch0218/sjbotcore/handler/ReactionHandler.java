@@ -14,7 +14,7 @@ public abstract class ReactionHandler {
 	
 	/**
 	 * Abstract method to handle the addition or removal of a {@link MessageReaction} on a certain message.
-	 * @param e - {@link GenericMessageReactionEvent) passed by the event handler.
+	 * @param e - {@link GenericMessageReactionEvent} passed by the event handler.
 	 * @param add - If the given was added to the message. If not, the reaction was removed.
 	 * @param isOwner - If the {@link ReactionHandler#getOwnerId()} matches the user which added the reaction.
 	 */
@@ -44,7 +44,7 @@ public abstract class ReactionHandler {
 	/**
 	 * Removes all {@link MessageReaction}s from a given message.
 	 * @param m - Message instance to remove {@link MessageReaction}s from.
-	 * @see {@link Message#clearReactions()}
+	 * @see Message#clearReactions()
 	 */
 	public static void clearAllReactions(Message m) {
 		if (m.getChannel().getType() != ChannelType.TEXT) { return; }
