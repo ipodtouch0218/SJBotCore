@@ -22,6 +22,9 @@ import net.dv8tion.jda.core.events.message.react.GenericMessageReactionEvent;
 import net.dv8tion.jda.core.events.message.react.MessageReactionAddEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
 
+/**
+ * Simple default JDA event listener which handles command parsing and {@link ReactionHandler}s.
+ */
 public class MessageHandler extends ListenerAdapter {
 
 	private static final Pattern ARGS_WITH_QUOTES = Pattern.compile("[^\\s\"']+|\"([^\"]*)\"|'([^']*)'");
@@ -284,7 +287,7 @@ public class MessageHandler extends ListenerAdapter {
 	
 	//--Register--//
 	/**
-	 * Registers a command to this CommandHandler. Commands must be registered before they will
+	 * Registers a command to this MessageHandler. Commands must be registered before they will
 	 * be able to be exectued by users and detected by help commands.
 	 * @param newCmd - Command to be registered
 	 * @return If the command was successfully added, i.e. {@link ArrayList#add()}
@@ -292,19 +295,46 @@ public class MessageHandler extends ListenerAdapter {
 	public boolean registerCommand(BotCommand newCmd) {
 		return commands.add(newCmd);
 	}
+	/**
+	 * Unregisters a command in this MessageHandler. Once removed, users can no longer use
+	 * the command as the handler will not be able to access the command.
+	 * @param newCmd - Command to be unregistered.
+	 * @return If the command was successfully removed, i.e. {@link ArrayList#remove(Object)}
+	 */
 	public boolean unregisterCommand(BotCommand newCmd) {
 		return commands.remove(newCmd);
 	}
+	/**
+	 * Assigns a {@link ReactionHandler} to the specified message id. If {@link MessageReaction}s are
+	 * added to the specified message, the ReactionHandler's handleReaction method will be called automatically.
+	 * @param messageid - Message ID to listen for reaction events.
+	 * @param handler - ReactionHandler to be assigned.
+	 */
 	public void addReactionHandler(long messageid, ReactionHandler handler) {
 		reactionHandlers.put(messageid, handler);
 	}
+	/**
+	 * Removes all active {@link ReactionHandler}s from the given message id.
+	 * @param messageId - Message ID to remove ReactionHandlers from.
+	 */
 	public void removeReactionHandler(long messageId) {
 		reactionHandlers.remove(messageId);
 	}
 	
 	//--Getters--//
+	/**
+	 * Returns all registered {@link BotCommands}
+	 * @return All currently registered commands.
+	 */
 	public HashSet<BotCommand> getAllCommands() { return commands; }
+	/**
+	 * Returns an optional, possibly containing the command which matches the given String in
+	 * either {@link BotCommand#getName()} or matching any {@link BotCommand#getAliases()}
+	 * @param name - String to match to the command.
+	 * @return Optional containing the command with the given name or alias.
+	 */
 	public Optional<BotCommand> getCommandByName(String name) {
+		name = name.toLowerCase();
 		BotCommand cmd = null;
 		for (BotCommand cmds : commands) {
 			if (name.equalsIgnoreCase(cmds.getName())) { 
@@ -312,13 +342,10 @@ public class MessageHandler extends ListenerAdapter {
 				cmd = cmds; 
 				break; 
 			}
-			if (cmd != null || cmds.getAliases() == null) { continue; } //already found another command (through alias), continue looping.
-			aliasLoop:
-			for (String aliases : cmds.getAliases()) {
-				if (name.equalsIgnoreCase(aliases)) {
-					//matches an alias, but keep checking for other matches to the name.
+			if (cmd != null) { continue; } //already found another command (through alias), continue looping.
+			if (cmds.getAliases().isPresent()) {
+				if (Arrays.stream(cmds.getAliases().get()).anyMatch(name::equals)) {
 					cmd = cmds;
-					break aliasLoop;
 				}
 			}
 		}

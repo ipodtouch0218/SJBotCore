@@ -1,5 +1,8 @@
 package me.ipodtouch0218.sjbotcore.command;
 
+/**
+ * Representation of a Command Flag after being parsed from a command's arguments.
+ */
 public class CommandFlag {
 
 	private String flagTag; //Tag of the flag, ex. -<tag> in the command itself.
@@ -11,7 +14,16 @@ public class CommandFlag {
 	}
 	
 	//--Getters--//
+	/**
+	 * Returns the parameters the flag consumed from the command arguments. Should be empty,
+	 * rather than null.
+	 * @return The parameters of the flag.
+	 */
 	public String[] getParameters() { return parameters; }
+	/**
+	 * Returns the tag "name" of the flag.
+	 * @return The tag of the flag.
+	 */
 	public String getTag() { return flagTag; }
 	
 	//--Other--//

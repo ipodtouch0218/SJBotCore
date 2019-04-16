@@ -1,4 +1,4 @@
-package me.ipodtouch0218.sjbotcore.files;
+ package me.ipodtouch0218.sjbotcore.files;
 
 public class BotSettings extends YamlConfig {
 

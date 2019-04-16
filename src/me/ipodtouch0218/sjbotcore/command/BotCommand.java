@@ -4,9 +4,16 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Optional;
 
+import me.ipodtouch0218.sjbotcore.handler.MessageHandler;
 import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.Message;
 
+/**
+ * A command that can be executed by the bot. It will automatically be parsed
+ * by the {@link MessageHandler} and the {@link BotCommand#execute(Message, String, ArrayList, FlagSet)} method
+ * will be called. Must be registered to the MessageHandler using {@link MessageHandler#registerCommand(BotCommand)}
+ * before the command can be used.
+ */
 public abstract class BotCommand {
 
 	//--Variables & Constructor--//
@@ -110,16 +117,36 @@ public abstract class BotCommand {
 	}
 	
 	//--Getters--//
+	/**
+	 * Returns the name of the command, used at the start of a command after the prefix to sepcify the command.
+	 * @return The name of the command
+	 */
 	public String getName() { return name; }
-	public String[] getAliases() { return aliases; }
+	/**
+	 * @return All applicable aliases
+	 */
+	public Optional<String[]> getAliases() { return Optional.ofNullable(aliases); }
 	public String getUsage() { return usage; }
 	public String getDescription() { return description; }
 	public boolean isFlagRegistered(String tag) { return registeredFlags.stream().anyMatch(f -> tag.equalsIgnoreCase(f.getTag())); }
 	public Optional<FlagInfo> getFlag(String tag) { return registeredFlags.stream().filter(f -> tag.equalsIgnoreCase(f.getTag())).findAny(); }
+	/**
+	 * Returns the permission the {@link User} sender must use to execute this command. Is ignored outside of Guilds.
+	 * @return The permission the user must have to execute this command
+	 */
 	@Deprecated
 	public Permission getPermission() { return permission; }
+	/**
+	 * Returns a set of {@link FlagInfo} instances, representing all registered flags.
+	 * @return A set of all registered flags
+	 */
 	public HashSet<FlagInfo> getFlags() { return registeredFlags; }
 	
+	/**
+`	 * Returns if the message can be ran in the channel the message was requested within.
+	 * @param msg - The message command request
+	 * @return If the command can be ran in the channel.
+	 */
 	public boolean canExecute(Message msg) {
 		switch (msg.getChannelType()) {
 		case PRIVATE:
