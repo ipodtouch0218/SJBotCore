@@ -10,7 +10,7 @@ import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.User;
 
 /**
- * A command that can be executed by the bot. It will automatically be parsed
+ * A command that can be executed by a user through the bot. It will automatically be parsed
  * by the {@link MessageHandler} and the {@link BotCommand#execute(Message, String, ArrayList, FlagSet)} method
  * will be called. Must be registered to the MessageHandler using {@link MessageHandler#registerCommand(BotCommand)}
  * before the command can be used.
@@ -20,7 +20,6 @@ public abstract class BotCommand {
 	//--Variables & Constructor--//
 	private String name; //Command name. Used to run the command itself, [prefix][name]
 	private String[] aliases; //The command can also be ran through these names. Command names take priority over aliases (if there's overlap)
-	@Deprecated
 	private Permission permission; //Permission the user needs to use this command.
 	
 	private String usage = ""; //Command usage, <> = required parameters, [] = optional parameters 
@@ -34,7 +33,7 @@ public abstract class BotCommand {
 	public BotCommand(String name, boolean guilds, boolean dms) {
 		this(name, guilds, dms, null);
 	}
-	@Deprecated
+
 	public BotCommand(String name, boolean guilds, boolean dms, Permission perm) {
 		this.name = name;
 		this.useInGuilds = guilds;
@@ -62,7 +61,6 @@ public abstract class BotCommand {
 	 * Sets the Discord {@link Permission} a sender of a command must have to execute this command
 	 * @param permission - New {@link Permission} to require.
 	 */
-	@Deprecated
 	public void setPermission(Permission permission) {
 		this.permission = permission;
 	}
@@ -135,7 +133,6 @@ public abstract class BotCommand {
 	 * Returns the permission the {@link User} sender must use to execute this command. Is ignored outside of Guilds.
 	 * @return The permission the user must have to execute this command
 	 */
-	@Deprecated
 	public Permission getPermission() { return permission; }
 	/**
 	 * Returns a set of {@link FlagInfo} instances, representing all registered flags.
