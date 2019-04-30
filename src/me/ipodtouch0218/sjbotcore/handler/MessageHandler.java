@@ -42,7 +42,7 @@ public class MessageHandler extends ListenerAdapter {
 		Message msg = e.getMessage();
 		User author = e.getAuthor();
 		
-		if (e.getAuthor().getIdLong() == e.getJDA().getSelfUser().getIdLong()) { return; }
+		if (author.isBot()) { return; }
 		if (isCommand(msg)) {
 			executeCommand(msg, author);
 		}
@@ -79,6 +79,7 @@ public class MessageHandler extends ListenerAdapter {
 	
 	//--Command Execution--//
 	protected void executeCommand(Message msg, User sender) {
+		if (sender.isBot()) { return; }
 		if (!isCommand(msg)) { return; } //not a command, but somehow got passed as one? huh.
 		MessageChannel channel = msg.getChannel();
 		
@@ -106,13 +107,15 @@ public class MessageHandler extends ListenerAdapter {
 				channel.sendMessage(String.format(core.getMessages().unknownCommand, cmdName)).queue();
 				return;
 			}
-			BotCommand closest = closestCommand(cmdName);
-			if (closest == null && core.getBotSettings().sendUnknownCommandMessage) {
-				channel.sendMessage(String.format(core.getMessages().unknownCommand, cmdName)).queue();
-			} else if (closest != null && core.getBotSettings().unknownCommandSuggestions) {
-				channel.sendMessage(String.format(core.getMessages().unknownCommandSuggestion, cmdName, closest.getName())).queue();
+			BotSettings s = core.getBotSettings();
+			if (s.sendUnknownCommandMessage) {
+				Optional<BotCommand> closest = closestCommand(cmdName);
+				if (s.unknownCommandSuggestions && closest.isPresent()) {
+					channel.sendMessage(String.format(core.getMessages().unknownCommandSuggestion, cmdName, closest.get().getName())).queue();
+				} else {
+					channel.sendMessage(String.format(core.getMessages().unknownCommand, cmdName)).queue();
+				}
 			}
-			
 			return;
 		}
 		
@@ -239,7 +242,7 @@ public class MessageHandler extends ListenerAdapter {
 	 * @return A possibly-null {@link BotCommand} with a similar name to the input.
 	 * @see <a href="https://en.wikipedia.org/wiki/Levenshtein_distance">Levenshtein Distance</a>
 	 */
-	protected BotCommand closestCommand(String input) {
+	protected Optional<BotCommand> closestCommand(String input) {
 
 		BotCommand closest = null;
 		float closestDistance = 1;
@@ -252,10 +255,10 @@ public class MessageHandler extends ListenerAdapter {
 			}
 		}
 		
-		if (closestDistance <= 0.5) { //at least half the characters have to match for a suggestion
-			return closest;
+		if (closestDistance > 0.5) { //at least half the characters have to match for a suggestion
+			closest = null;
 		}
-		return null;
+		return Optional.ofNullable(closest);
 	}
 	
 	private static int calcLevenshteinDistance(String x, String y) {
