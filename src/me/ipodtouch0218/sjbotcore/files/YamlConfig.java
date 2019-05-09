@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
@@ -14,6 +15,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
  * automatically serialized and saved, so developers don't have to handle serializing all the
  * fields within their custom class.
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class YamlConfig {
 
 	@JsonIgnore
