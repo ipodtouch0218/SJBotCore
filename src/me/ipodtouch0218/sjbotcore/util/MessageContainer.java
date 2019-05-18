@@ -2,12 +2,12 @@ package me.ipodtouch0218.sjbotcore.util;
 
 import java.util.Optional;
 
-import net.dv8tion.jda.bot.sharding.ShardManager;
-import net.dv8tion.jda.core.JDA;
-import net.dv8tion.jda.core.entities.Guild;
-import net.dv8tion.jda.core.entities.Message;
-import net.dv8tion.jda.core.entities.MessageChannel;
-import net.dv8tion.jda.core.requests.RestAction;
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.requests.RestAction;
+import net.dv8tion.jda.api.sharding.ShardManager;
 
 /**
  * A simple message container, holding the Guild ID, Channel ID, and Message ID of
@@ -100,7 +100,7 @@ public class MessageContainer {
 		if (ch == null) { 
 			throw new IllegalArgumentException("Unable to get message with id " + messageId + " - invalid channel.");
 		}
-		return getChannel(jda).getMessageById(messageId);
+		return getChannel(jda).retrieveMessageById(messageId);
 	}
 	/**
 	 * Returns a RestAction containing the {@link Message} instance wrapped within this wrapper.
@@ -112,6 +112,6 @@ public class MessageContainer {
 		if (ch == null) { 
 			throw new IllegalArgumentException("Unable to get message with id " + messageId + " - invalid channel.");
 		}
-		return getChannel(sm).getMessageById(messageId);
+		return getChannel(sm).retrieveMessageById(messageId);
 	}
 }

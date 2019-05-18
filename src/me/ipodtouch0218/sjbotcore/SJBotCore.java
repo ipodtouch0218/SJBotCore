@@ -10,9 +10,9 @@ import me.ipodtouch0218.sjbotcore.files.BotSettings;
 import me.ipodtouch0218.sjbotcore.files.MessageSettings;
 import me.ipodtouch0218.sjbotcore.files.YamlConfig;
 import me.ipodtouch0218.sjbotcore.handler.MessageHandler;
-import net.dv8tion.jda.bot.sharding.DefaultShardManagerBuilder;
-import net.dv8tion.jda.bot.sharding.ShardManager;
-import net.dv8tion.jda.core.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.sharding.DefaultShardManagerBuilder;
+import net.dv8tion.jda.api.sharding.ShardManager;
 
 /**
  * Simple JDA Bot Core. Proves fundamental bot function like command handling

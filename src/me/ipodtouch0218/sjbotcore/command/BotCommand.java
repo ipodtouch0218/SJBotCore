@@ -5,9 +5,9 @@ import java.util.HashSet;
 import java.util.Optional;
 
 import me.ipodtouch0218.sjbotcore.handler.MessageHandler;
-import net.dv8tion.jda.core.Permission;
-import net.dv8tion.jda.core.entities.Message;
-import net.dv8tion.jda.core.entities.User;
+import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.User;
 
 /**
  * A command that can be executed by a user through the bot. It will automatically be parsed

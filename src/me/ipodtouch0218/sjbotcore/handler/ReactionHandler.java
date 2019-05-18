@@ -1,7 +1,10 @@
 package me.ipodtouch0218.sjbotcore.handler;
 
-import net.dv8tion.jda.core.entities.*;
-import net.dv8tion.jda.core.events.message.react.GenericMessageReactionEvent;
+import net.dv8tion.jda.api.entities.ChannelType;
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.MessageReaction;
+import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.events.message.react.GenericMessageReactionEvent;
 
 /**
  * A basic {@link MessageReaction} handler. Can be added to a {@link MessageHandler} to be passed control
